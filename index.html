@@ -12,15 +12,8 @@
             padding: 20px;
             color: #333;
         }
-        h1 {
-            color: #2c3e50;
-        }
-        h2 {
+        h1, h2 {
             color: #2980b9;
-        }
-        p {
-            font-size: 16px;
-            line-height: 1.5;
         }
         form {
             margin: 20px 0;
@@ -33,6 +26,7 @@
             display: block;
             margin: 10px 0 5px;
         }
+        input[type="text"],
         input[type="email"],
         input[type="password"] {
             width: calc(100% - 20px);
@@ -54,30 +48,131 @@
         button:hover {
             background-color: #1a5f8a;
         }
+        .game-container {
+            display: none;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <h1>¡Bienvenido a mi página web!</h1>
-    <p>Este es un espacio donde comparto mis servicios y proyectos. Aquí podrás iniciar sesión y jugar algunos juegos divertidos.</p>
+    <p>Este es un espacio donde comparto mis servicios y proyectos. Aquí podrás iniciar sesión, registrarte y jugar algunos juegos divertidos.</p>
 
-    <h2>Área Personal</h2>
-    <form>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+    <h2>Registro</h2>
+    <form id="registerForm">
+        <label for="regEmail">Email:</label>
+        <input type="email" id="regEmail" name="regEmail" required>
         
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required>
+        <label for="regPassword">Contraseña:</label>
+        <input type="password" id="regPassword" name="regPassword" required>
+        
+        <input type="submit" value="Registrarse">
+    </form>
+
+    <h2>Iniciar Sesión</h2>
+    <form id="loginForm">
+        <label for="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" name="loginEmail" required>
+        
+        <label for="loginPassword">Contraseña:</label>
+        <input type="password" id="loginPassword" name="loginPassword" required>
         
         <input type="submit" value="Iniciar Sesión">
     </form>
 
-    <h2>Juega con nosotros</h2>
-    <button onclick="jugar()">Jugar</button>
+    <div class="game-container" id="gameContainer">
+        <h2>Juego: Tres en Raya</h2>
+        <div class="grid" id="grid"></div>
+        <button onclick="resetGame()">Reiniciar Juego</button>
+    </div>
 
     <script>
-        function jugar() {
-            alert("¡Bienvenido al juego! Aquí podrías agregar la lógica de tu juego.");
-            // Aquí puedes agregar más lógica del juego.
+        let currentPlayer = 'X';
+        let board = ['', '', '', '', '', '', '', '', ''];
+        
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            alert(`Usuario registrado: ${email}`);
+            // Aquí debes agregar la lógica para almacenar el usuario y enviar un correo de confirmación.
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            alert(`Usuario conectado: ${email}`);
+            document.getElementById('gameContainer').style.display = 'block';
+            createBoard();
+        });
+
+        function createBoard() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            board.forEach((cell, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'cell';
+                cellDiv.dataset.index = index;
+                cellDiv.innerText = cell;
+                cellDiv.addEventListener('click', handleCellClick);
+                grid.appendChild(cellDiv);
+            });
+        }
+
+        function handleCellClick(e) {
+            const index = e.target.dataset.index;
+            if (!board[index]) {
+                board[index] = currentPlayer;
+                e.target.innerText = currentPlayer;
+                if (checkWin()) {
+                    alert(`${currentPlayer} ha ganado!`);
+                    resetGame();
+                } else if (board.every(cell => cell)) {
+                    alert("Es un empate!");
+                    resetGame();
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                }
+            }
+        }
+
+        function checkWin() {
+            const winPatterns = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6],
+            ];
+            return winPatterns.some(pattern => {
+                const [a, b, c] = pattern;
+                return board[a] && board[a] === board[b] && board[a] === board[c];
+            });
+        }
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            createBoard();
         }
     </script>
 </body>
